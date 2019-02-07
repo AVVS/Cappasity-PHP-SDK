@@ -51,7 +51,7 @@ $params = Request\Process\JobsRegisterSyncPost::fromData(
     [
       'id' => 'inner-product-id',
       'aliases' => ['SkuGoesHere'],
-      'capp' => self::STUB_FILE_ID,
+      'capp' => '38020fdf-5e11-411c-9116-1610339d59cf',
     ]
   ],
   'push:http',
@@ -131,7 +131,7 @@ $registerSyncJobId = $client
       [
         'id' => 'inner-product-id',
         'aliases' => ['SkuGoesHere'],
-        'capp' => self::STUB_FILE_ID,
+        'capp' => '38020fdf-5e11-411c-9116-1610339d59cf',
       ]
     ],
     'push:http',
@@ -151,7 +151,7 @@ $registerSyncJobId = $client
       [
         'id' => 'inner-product-id',
         'aliases' => ['SkuGoesHere'],
-        'capp' => self::STUB_FILE_ID,
+        'capp' => '38020fdf-5e11-411c-9116-1610339d59cf',
       ]
     ],
     'pull'
@@ -217,7 +217,7 @@ When no jobs to acknowledge were found, the result is 0.
 # EmbedRenderer
 
 ## Render embed code
-The only required parameter is `fileName`, which holds Cappasity 3D View ID. If it is not present or empty,  
+The only required parameter is `viewId`, which holds Cappasity 3D View ID. If it is not present or empty,  
 `CappasitySDK\EmbedRenderer\Exception\InvalidParamsException` is thrown.
 
 ```php
