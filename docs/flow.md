@@ -73,7 +73,7 @@ Let's say you have:
 * Products on your store side:
     * Product with ID `111` without options with single SKU `SKU-111`
     * Product with ID `222` with options that have IDs `222a` and `222b`, product 
-option `222a` has SKU `SKU-222-a` and product option `222` has SKU `SKU-222-b`
+option `222a` has SKU `SKU-222-a` and product option `222b` has SKU `SKU-222-b`
     * Product with ID `333` with single SKU `SKU-333`
 * 3D Views uploaded on Cappasity side:
     * View with ID `00000000-0000-0000-0000-000000000111` and SKU `SKU-111`
