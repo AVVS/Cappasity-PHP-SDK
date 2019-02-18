@@ -2,10 +2,11 @@
 
 (c) Copyright 2019, Cappasity Inc. All rights reserved.
 
-Cappasity SDK includes two components – `Client` and `EmbedRenderer`.
+Cappasity SDK includes three components – `Client`, `EmbedRenderer` and `PreviewImageSrcGenerator`.
 
 `Client` is responsible for making HTTP requests to Cappasity API. `EmbedRenderer` allows you to generate iFrame code to 
-embed your HTML.
+embed your HTML. In case you want to display Cappasity 3D View preview image `PreviewImageSrcGenerator` component helps you
+to get a link to an image that fits desired sizes, format, quality, etc. 
 
 ## Table of Contents
 
@@ -34,6 +35,9 @@ embed your HTML.
 * [EmbedRenderer](#embedrenderer)
   * [Render embed code](#render-embed-code)
     * [Rendered code example](#rendered-code-example)
+* [PreviewImageSrcGenerator](#PreviewImageSrcGenerator)
+TODO GENERATE TOC!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
 
 # Client
 
@@ -313,3 +317,51 @@ $embedCode = $renderer->render([
     src="https://api.cappasity.com/api/player/38020fdf-5e11-411c-9116-1610339d59cf/embedded?autorun=1&closebutton=0&logo=1&autorotate=0&autorotatetime=10&autorotatedelay=2&autorotatedir=1&hidefullscreen=1&hideautorotateopt=1&hidesettingsbtn=0&enableimagezoom=1&zoomquality=2&hidezoomopt=0&analytics=1"
 ></iframe>
 ```
+
+# PreviewImageSrcGenerator
+
+## Generate preview link
+Set up `PreviewImageSrcGenerator`, provide Cappasity Account username and Cappasity 3D View ID and generate a link:
+```
+use CappasitySDK\PreviewImageSrcGeneratorFactory; 
+
+$generator = new PreviewImageSrcGeneratorFactory::getGeneratorInstance();
+
+$previewImageSrc = $generator->generatePreviewImageSrc('username', '38020fdf-5e11-411c-9116-1610339d59cf');
+```
+
+### Options list
+| Parameter   | Description                         |
+|-------------|-------------------------------------|
+| `format`    | `jpeg`, `jpg`, `png`, `gif`, `webp` |
+| `overlay`   | [Overlays](#overlays)               |
+| `modifiers` | [Modifiers](#modifiers)             |
+
+#### Overlays
+Image that is laid over the preview image
+
+| Overlay                                        | Preview |
+|------------------------------------------------|---------|
+| `3db`                                          |         |
+| `3db@2x`                                       |         |
+| `3db@3x`                                       |         |
+| `3dp`                                          |         |
+| `3dp@2x`                                       |         |
+| `3dp@3x`                                       |         |
+
+#### Modifiers
+Crop, quality and background modifiers
+
+| Modifier     | Description                                                                                                       | Example                                    |
+|--------------|-------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| `crop`       | Crop type                                                                                                         | `fit`, `fill`, `cut`, `pad`                |
+| `height`     | Height                                                                                                            | 300                                        |
+| `width`      | Width                                                                                                             | 200                                        |
+| `square`     | Width and height                                                                                                  | 250                                        |
+| `top`        | Crop start from top, px                                                                                           | 10                                         |
+| `left`       | Crop start from left, px                                                                                          | 10                                         |
+| `gravity`    | Image placement within resulting image (north, south, west, east, north-east, north-west, south-east, south-west) | `n`, `s`, `w`, `e`, `ne`, `nw`, `se`, `sw` |
+| `quality`    | Quality factor, bpp                                                                                               | 100                                        |
+| `background` | Background color (hash-prefixed 6-char hex value)                                                                 | #ffffff                                    |
+
+### Examples
