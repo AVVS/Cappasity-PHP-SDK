@@ -424,7 +424,7 @@ Choose reasonable preview `quality`:
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200-q30/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200-q50/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
 
-On the 3D Cappasity View upload a person chooses respective background color. We store it in 3D View metadata.
+On the 3D Cappasity View upload a person chooses a respective background color. We store it in 3D View metadata.
 You can use that color as preview background color, otherwise it would be white:
 
 | width=200, height=300, crop=cpad | width=200, height=300, background=000000 |
@@ -433,7 +433,7 @@ You can use that color as preview background color, otherwise it would be white:
 
 
 ### Overlays examples
-Overlay is an image that covers original preview image.
+An overlay is an image that covers the original preview image.
 Choose reasonable overlay quality:
 
 ##### 3dp
