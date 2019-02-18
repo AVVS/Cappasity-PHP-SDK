@@ -422,7 +422,7 @@ Choose reasonable preview `quality`:
 
 | square=300 (resulted in ~4.6Kb) | square=300, quality=30 (resulted in ~1.5Kb) | square=300, quality=50 (resulted in ~2Kb) |
 :-------------------------:|:-------------------------:|:-------------------------:
-![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200-q30/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200-q50/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s300-q30/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s300-q50/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
 
 On the 3D Cappasity View upload a person chooses a respective background color. We store it in 3D View metadata.
 You can use that color as preview background color, otherwise it would be white:
