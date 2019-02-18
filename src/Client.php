@@ -287,7 +287,11 @@ class Client implements ClientInterface
      */
     private function assertParams(Client\Model\Request\RequestParamsInterface $params, $validatorType)
     {
-        $this->validator->assert($params, $this->validator->buildByType($validatorType));
+        try {
+            $this->validator->assert($params, $this->validator->buildByType($validatorType));
+        } catch (ValidatorWrapper\Exception\ValidationException $e) {
+            throw Client\Exception\ValidationException::fromValidatorWrapperValidationException($e);
+        }
     }
 
     private function validateConfig() {

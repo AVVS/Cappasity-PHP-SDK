@@ -93,7 +93,7 @@ class ValidatorWrapperTest extends \PHPUnit_Framework_TestCase
             $validatorWrapper->assert($paramsMock, $typeValidatorMock);
 
             $this->fail('Expected an exception to be thrown');
-        } catch (\CappasitySDK\Client\Exception\ValidationException $e) {
+        } catch (\CappasitySDK\ValidatorWrapper\Exception\ValidationException $e) {
             $this->assertEquals($expectedMessage, $e->getMessage());
         } catch (\Exception $e) {
             $exceptionType = get_class($e);

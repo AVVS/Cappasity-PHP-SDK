@@ -10,15 +10,16 @@
  * @copyright 2019 Cappasity Inc.
  */
 
-namespace CappasitySDK\Client\Validator;
+namespace CappasitySDK;
 
-use CappasitySDK\ValidatorTypeInterface;
-
-interface TypeInterface extends ValidatorTypeInterface
+interface ValidatorTypeInterface
 {
+    /**
+     * @return \Respect\Validation\Validator
+     */
+    public static function configureValidator();
 
     /**
-     * TODO Check in ValidatorWrapper that all required rule namespaces are appended to factory
      * @return array
      */
     public static function getRequiredRuleNamespaces();

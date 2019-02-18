@@ -23,8 +23,9 @@ use CappasitySDK\Client\Validator\Type\Request\Process\JobsRegisterSyncPost as J
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsPullListGet as JobsPullListGetType;
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsPullResultGet as JobsPullResultGetType;
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsPullAckPost as JobsPullAckPostType;
+use CappasitySDK\PreviewImageSrcGenerator\Validator\Type\PreviewImageOptions as PreviewImageOptionsType;
 
-class ValidatorTypeTest extends \PHPUnit_Framework_TestCase
+class ValidatorTypesTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider provideJobsRegisterSyncPostData
@@ -284,26 +285,6 @@ class ValidatorTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertValidator($validator, $params, $shouldBeValid, $expectedError);
     }
 
-    // todo rename
-    private function assertValidator(\Respect\Validation\Validator $validator, $params, $shouldBeValid, $expectedError)
-    {
-        try {
-            $validator->assert($params);
-
-            if ($shouldBeValid === false) {
-                $this->fail('Value should be considered invalid');
-            }
-        } catch (NestedValidationException $e) {
-            $actualError = $e->getFullMessage();
-
-            if ($shouldBeValid) {
-                $this->fail("Value should be considered valid, but assertion failed: {$actualError}");
-            }
-
-            $this->assertEquals($expectedError, $actualError);
-        }
-    }
-
     public function providePullAckPostData()
     {
         return [
@@ -333,5 +314,81 @@ class ValidatorTypeTest extends \PHPUnit_Framework_TestCase
                 '- 123 must be a string'
             ],
         ];
+    }
+
+    /**
+     * @dataProvider providePreviewLinkGenerationPreviewImageOptionsData
+     * @param array $options
+     * @param boolean $shouldBeValid
+     * @param null|string $expectedError
+     */
+    public function testValidatePreviewLinkGenerationPreviewImageOptions(array $options, $shouldBeValid, $expectedError = null)
+    {
+        foreach (PreviewImageOptionsType::getRequiredRuleNamespaces() as $namespace) {
+            v::with($namespace);
+        }
+
+        $validator = PreviewImageOptionsType::configureValidator();
+
+        $this->assertValidator($validator, $options, $shouldBeValid, $expectedError);
+    }
+
+    public function providePreviewLinkGenerationPreviewImageOptionsData()
+    {
+        return [
+            [
+                [],
+                true,
+            ],
+            [
+                [
+                    'modifiers' => [
+                        'background' => '#aaaaaa',
+                        'crop' => 'cut',
+                    ],
+                    'format' => 'png',
+                    'overlay' => '3db',
+                ],
+                true,
+            ],
+            [
+                [
+                    'modifiers' => [
+                        'background' => 'aaaaaa',
+                        'crop' => 'unknown-crop',
+                    ],
+                    'format' => 'unknown-format',
+                    'overlay' => 'unknown-overlay',
+                ],
+                false,
+                join(PHP_EOL, [
+                    '- All of the required rules must pass for PreviewImageOptions',
+                    '  - These rules must pass for modifiers',
+                    '    - background must match pattern /^#[0-9a-f]{6}$/',
+                    '    - crop must be in { "fit", "fill", "cut", "pad" }',
+                    '  - format must be in { "jpeg", "jpg", "png", "webp", "gif" }',
+                    '  - overlay must be in { "3db", "3db@2x", "3db@3x", "3dp", "3dp@2x", "3dp@3x" }',
+                ]),
+            ]
+        ];
+    }
+
+    private function assertValidator(\Respect\Validation\Validator $validator, $params, $shouldBeValid, $expectedError)
+    {
+        try {
+            $validator->assert($params);
+
+            if ($shouldBeValid === false) {
+                $this->fail('Value should be considered invalid');
+            }
+        } catch (NestedValidationException $e) {
+            $actualError = $e->getFullMessage();
+
+            if ($shouldBeValid) {
+                $this->fail("Value should be considered valid, but assertion failed: {$actualError}");
+            }
+
+            $this->assertEquals($expectedError, $actualError);
+        }
     }
 }
