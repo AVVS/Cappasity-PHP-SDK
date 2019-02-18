@@ -33,9 +33,6 @@ class PreviewImageSrcGenerator
     const OPTION_MODIFIER_QUALITY = 'quality';
     const OPTION_MODIFIER_BACKGROUND = 'background';
 
-    const OVERLAY_3DB = '3db';
-    const OVERLAY_3DB_2X = '3db@2x';
-    const OVERLAY_3DB_3X = '3db@3x';
     const OVERLAY_3DP = '3dp';
     const OVERLAY_3DP_2X = '3dp@2x';
     const OVERLAY_3DP_3X = '3dp@3x';
@@ -62,9 +59,6 @@ class PreviewImageSrcGenerator
     const GRAVITY_SOUTH_WEST = 'sw';
 
     public static $supportedOverlays = [
-        self::OVERLAY_3DB,
-        self::OVERLAY_3DB_2X,
-        self::OVERLAY_3DB_3X,
         self::OVERLAY_3DP,
         self::OVERLAY_3DP_2X,
         self::OVERLAY_3DP_3X,

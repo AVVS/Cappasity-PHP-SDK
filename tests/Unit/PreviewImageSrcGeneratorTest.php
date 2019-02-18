@@ -53,7 +53,7 @@ class PreviewImageSrcGeneratorTest extends \PHPUnit_Framework_TestCase
                 '38020fdf-5e11-411c-9116-1610339d59cf',
                 [
                     'format' => \CappasitySDK\PreviewImageSrcGenerator::FORMAT_PNG,
-                    'overlay' => \CappasitySDK\PreviewImageSrcGenerator::OVERLAY_3DB,
+                    'overlay' => \CappasitySDK\PreviewImageSrcGenerator::OVERLAY_3DP,
                     'modifiers' => [
                         'width' => 600,
                         'height' => 500,
@@ -61,8 +61,8 @@ class PreviewImageSrcGeneratorTest extends \PHPUnit_Framework_TestCase
                         'background' => '#09214c',
                     ]
                 ],
-                'https://api.cappasity.com/api/files/preview/foobaruser/w600-h500-cfill-b09214c/38020fdf-5e11-411c-9116-1610339d59cf.png?o=3db'
-            ]
+                'https://api.cappasity.com/api/files/preview/foobaruser/w600-h500-cfill-b09214c/38020fdf-5e11-411c-9116-1610339d59cf.png?o=3dp'
+            ],
         ];
     }
 }

@@ -347,7 +347,7 @@ class ValidatorTypesTest extends \PHPUnit_Framework_TestCase
                         'crop' => 'cut',
                     ],
                     'format' => 'png',
-                    'overlay' => '3db',
+                    'overlay' => '3dp',
                 ],
                 true,
             ],
@@ -367,7 +367,7 @@ class ValidatorTypesTest extends \PHPUnit_Framework_TestCase
                     '    - background must match pattern /^#[0-9a-f]{6}$/',
                     '    - crop must be in { "fit", "fill", "cut", "pad" }',
                     '  - format must be in { "jpeg", "jpg", "png", "webp", "gif" }',
-                    '  - overlay must be in { "3db", "3db@2x", "3db@3x", "3dp", "3dp@2x", "3dp@3x" }',
+                    '  - overlay must be in { "3dp", "3dp@2x", "3dp@3x" }',
                 ]),
             ]
         ];
