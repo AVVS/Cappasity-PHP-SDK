@@ -37,4 +37,19 @@ class ClientFactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(\CappasitySDK\ReportableClient::class, get_class($client));
     }
+
+    public function testGetClientInstanceWithCustomReportableClientConfig()
+    {
+        $client = \CappasitySDK\ClientFactory::getClientInstance([
+            'apiToken' => 'api.token.stub',
+            'sendReports' => true,
+            'reportableClient' => [
+                'ravenClient' => [
+                    'optionsOrDsn' => 'https://3736a7965d59423c867105ee4ba47de2@sentry.io/137605',
+                ],
+            ],
+        ]);
+
+        $this->assertEquals(\CappasitySDK\ReportableClient::class, get_class($client));
+    }
 }

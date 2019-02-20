@@ -20,7 +20,7 @@ class ClientFactory
         'apiToken' => null,
         'transport' => [
             'type' => self::GUZZLE_TRANSPORT,
-            'httpClientConfig' => [
+            'httpClient' => [
                 'defaults' => [
                     'exceptions' => false,
                 ]
@@ -28,6 +28,14 @@ class ClientFactory
             'options' => [],
         ],
         'sendReports' => false,
+        'reportableClient' => [
+            'ravenClient' => [
+                'optionsOrDSN' => ReportableClient::CAPPASITY_DSN,
+                'options' => [
+                    'timeout' => 2,
+                ],
+            ]
+        ],
         'config' => []
     ];
 
@@ -35,7 +43,7 @@ class ClientFactory
     {
         $resolvedOptions = array_replace_recursive(self::$defaultOptions, $options);
         $transportOptions = $resolvedOptions['transport']['options'];
-        $httpClientConfig = $resolvedOptions['transport']['httpClientConfig'];
+        $httpClientConfig = $resolvedOptions['transport']['httpClient'];
         $httpClient = new \GuzzleHttp\Client($httpClientConfig);
         $apiToken = $resolvedOptions['apiToken'];
 
@@ -52,7 +60,9 @@ class ClientFactory
         $client = new Client($transport, $apiToken, $validator, $responseAdapter, $clientConfig);
 
         if ($resolvedOptions['sendReports'] === true) {
-            $client = ReportableClient::createWithClient($client);
+            $ravenOptions = $resolvedOptions['reportableClient']['ravenClient'];
+            $ravenClient = new \Raven_Client($ravenOptions['optionsOrDSN'], $ravenOptions['options']);
+            $client = new ReportableClient($client, $ravenClient);
         }
 
         return $client;
