@@ -10,19 +10,18 @@
  * @copyright 2019 Cappasity Inc.
  */
 
-namespace CappasitySDK\Client\Exception;
+namespace CappasitySDK\PreviewImageSrcGenerator\Exception;
 
 use CappasitySDK\ValidatorWrapper\Exception\ValidationException as ValidatorException;
 
-class ValidationException extends ClientException
+class ValidationException extends GeneratorException
 {
     /**
      * @param ValidatorException $e
-     *
      * @return static
      */
     public static function fromValidatorWrapperValidationException(ValidatorException $e)
     {
-        return new static($e->getCode(), $e->getMessage(), $e->getPrevious());
+        return new static($e->getMessage(), $e->getCode(), $e->getPrevious());
     }
 }

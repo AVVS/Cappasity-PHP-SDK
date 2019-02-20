@@ -16,13 +16,13 @@ use Respect\Validation\Validator;
 use Respect\Validation\Exceptions\NestedValidationException;
 use Respect\Validation\Factory;
 
-use CappasitySDK\Client\Model\Request\RequestParamsInterface;
-use CappasitySDK\Client\Exception\ValidationException;
+use CappasitySDK\ValidatorWrapper\Exception\ValidationException;
 
 class ValidatorWrapper
 {
     private static $rulePrefixesToAppend = [
         'CappasitySDK\\Client\\Validator\\Rules',
+        'CappasitySDK\\PreviewImageSrcGenerator\\Validator\\Rules',
     ];
 
     /**
@@ -48,8 +48,17 @@ class ValidatorWrapper
             throw new \LogicException('Type class must have method configureValidator()');
         }
 
+        if (!method_exists($typeClassName, 'getRequiredRuleNamespaces')) {
+            throw new \LogicException('Type class must have method getRequiredRuleNamespaces()');
+        }
+
+        if (count(array_diff($typeClassName::getRequiredRuleNamespaces(), $this->factory->getRulePrefixes())) > 0) {
+            throw new \LogicException('Not all required rule namespaces were appended to the factory, check the diff');
+        }
+
         Validator::setFactory($this->factory);
 
+        /** @var \Respect\Validation\Validator $validator */
         $validator = $typeClassName::configureValidator($this->factory);
 
         Validator::setFactory(null);
@@ -59,17 +68,17 @@ class ValidatorWrapper
 
     /**
      * @param Validator $typeValidator
-     * @param RequestParamsInterface $params
+     * @param $input
      * @return bool
      *
      * @throws ValidationException
      */
-    public function assert(RequestParamsInterface $params, Validator $typeValidator)
+    public function assert($input, Validator $typeValidator)
     {
         Validator::setFactory($this->factory);
 
         try {
-            return $typeValidator->assert($params);
+            return $typeValidator->assert($input);
         } catch (NestedValidationException $e) {
             throw ValidationException::fromNestedValidationException($e);
         } finally {
@@ -78,16 +87,16 @@ class ValidatorWrapper
     }
 
     /**
-     * @param RequestParamsInterface $params
+     * @param $input
      * @param Validator $typeValidator
      * @return bool
      */
-    public function validate(RequestParamsInterface $params, Validator $typeValidator)
+    public function validate($input, Validator $typeValidator)
     {
         Validator::setFactory($this->factory);
 
         try {
-            return $typeValidator->validate($params);
+            return $typeValidator->validate($input);
         } finally {
             Validator::setFactory(null);
         }

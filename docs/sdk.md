@@ -2,10 +2,11 @@
 
 (c) Copyright 2019, Cappasity Inc. All rights reserved.
 
-Cappasity SDK includes two components – `Client` and `EmbedRenderer`.
+Cappasity SDK includes three components – `Client`, `EmbedRenderer` and `PreviewImageSrcGenerator`.
 
 `Client` is responsible for making HTTP requests to Cappasity API. `EmbedRenderer` allows you to generate iFrame code to 
-embed your HTML.
+embed your HTML. In case you want to display Cappasity 3D View preview image `PreviewImageSrcGenerator` component helps you
+to get a link to an image that fits desired sizes, format, quality, etc. 
 
 ## Table of Contents
 
@@ -34,6 +35,12 @@ embed your HTML.
 * [EmbedRenderer](#embedrenderer)
   * [Render embed code](#render-embed-code)
     * [Rendered code example](#rendered-code-example)
+* [PreviewImageSrcGenerator](#previewimagesrcgenerator)
+  * [Generate preview link](#generate-preview-link)
+  * [Options list](#options-list)
+    * [Modifiers list](#modifiers-list)
+    * [Modifiers examples](#modifiers-examples)
+    * [Overlays examples](#overlays-examples)   
 
 # Client
 
@@ -313,3 +320,133 @@ $embedCode = $renderer->render([
     src="https://api.cappasity.com/api/player/38020fdf-5e11-411c-9116-1610339d59cf/embedded?autorun=1&closebutton=0&logo=1&autorotate=0&autorotatetime=10&autorotatedelay=2&autorotatedir=1&hidefullscreen=1&hideautorotateopt=1&hidesettingsbtn=0&enableimagezoom=1&zoomquality=2&hidezoomopt=0&analytics=1"
 ></iframe>
 ```
+
+# PreviewImageSrcGenerator
+
+## Generate preview link
+* Set up `PreviewImageSrcGenerator`
+* Provide Cappasity Account username and Cappasity 3D View ID 
+* Generate links:
+```php
+use CappasitySDK\PreviewImageSrcGeneratorFactory as GeneratorFactory;
+use CappasitySDK\PreviewImageSrcGenerator as Generator; 
+
+$generator = new GeneratorFactory::getGeneratorInstance();
+
+$originalPreview = $generator->generatePreviewImageSrc('username', '38020fdf-5e11-411c-9116-1610339d59cf');
+
+// Explore and use \CappasitySDK\PreviewImageSrcGenerator class constants and static arrays with available options for 
+// better code style:
+$modifiedPreview = $generator->generatePreviewImageSrc('username', '38020fdf-5e11-411c-9116-1610339d59cf', [
+    'format' => Generator::FORMAT_PNG, // 'png'
+    'overlay' => Generator::OVERLAY_3DP_2X, // '3dp@2x'
+    'modifiers' => [
+        'square' => 250,
+        'quality' => 30, 
+    ],
+]);  
+``` 
+
+## Options list
+| Parameter   | Description |
+|-------------|-------------|
+| `format`    | `jpeg`, `jpg`, `png`, `gif`, `webp` |
+| `overlay`   | `3dp`, `3dp@2x`, `3dp@3x`[(see examples)](#overlays-examples) |
+| `modifiers` | See the [list of available modifiers](#modifiers-list) and [examples](#modifiers-examples)  |
+
+### Modifiers list
+
+| Modifier     | Description                                                                                                               | Example                                    |
+|--------------|---------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| `crop`       | Crop type                                                                                                                 | `fit`, `fill`, `cut`, `pad`                |
+| `height`     | Height, px                                                                                                                | 300                                        |
+| `width`      | Width, px                                                                                                                 | 200                                        |
+| `square`     | Width and height, px                                                                                                      | 250                                        |
+| `top`        | Crop start from top, px                                                                                                   | 10                                         |
+| `left`       | Crop start from left, px                                                                                                  | 10                                         |
+| `gravity`    | Image placement within resulting image (center, north, south, west, east, north-east, north-west, south-east, south-west) | `c`, `n`, `s`, `w`, `e`, `ne`, `nw`, `se`, `sw` |
+| `quality`    | Quality factor, bpp                                                                                                       | 100                                        |
+| `background` | Background color (hash-prefixed 6-char hex value)                                                                         | `#ffffff`                                  |
+
+### Modifiers examples
+
+Full-size original previews links:
+[THE RING (1012 x 1024 px)](https://api.cappasity.com/api/files/preview/cappasity/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | [THE WATCH (1024 x 526 px)](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfit/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+By default `fit` crop is applied:
+
+| square=300 | width=200, height=400, crop=`fit` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfit/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/14b8f4f4-6e89-4a6f-8535-651c09d180b3) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfit/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+Cut crop:
+
+| square=300 | width=200, height=400, crop=`cut` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-ccut/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/14b8f4f4-6e89-4a6f-8535-651c09d180b3) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-ccut/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+Pad crop:
+
+| square=300 | width=200, height=400, crop=`pad` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cpad/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/14b8f4f4-6e89-4a6f-8535-651c09d180b3) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cpad/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+
+Fill crop:
+
+| square=300 | width=200, height=400, crop=`fill` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/14b8f4f4-6e89-4a6f-8535-651c09d180b3) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+You can change the starting coordinates of the crop using `left` and `top` modifiers:
+
+| width=200, height=400, crop=`fill` | width=200, height=400, crop=`fill`, left=120 |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill-x120/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+
+| width=200, height=400, crop=`fill` | width=200, height=400, crop=`fill`, left=273 |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill/14b8f4f4-6e89-4a6f-8535-651c09d180b3) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill-x273/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+Also you can make it with specifying the `gravity`:
+
+| square=300 | width=200, height=400, crop=`fill`, gravity=`e` (east) |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/w200-h400-cfill-ge/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+
+Choose reasonable preview `quality`:
+
+| square=300 (resulted in ~4.6Kb) | square=300, quality=30 (resulted in ~1.5Kb) | square=300, quality=50 (resulted in ~2Kb) |
+:-------------------------:|:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s300-q30/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s300-q50/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
+
+On the 3D Cappasity View upload a person chooses a respective background color. We store it in 3D View metadata.
+You can use that color as preview background color, otherwise it would be white:
+
+| width=200, height=300, crop=cpad | width=200, height=300, background=000000 |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/h300-w200-cpad/14b8f4f4-6e89-4a6f-8535-651c09d180b3) | ![](https://api.cappasity.com/api/files/preview/cappasity/h300-w200-cpad-b000000/14b8f4f4-6e89-4a6f-8535-651c09d180b3)
+
+
+### Overlays examples
+An overlay is an image that covers the original preview image.
+Choose reasonable overlay quality:
+
+##### 3dp
+| square=200 | square=200, overlay=`3dp` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s200/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200/34ddd305-bb53-4fd7-8dce-8555fc5a269f?o=3dp) 
+
+##### 3dp@2x
+| square=200 | square=200, overlay=`3dp@2x` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s200/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200/34ddd305-bb53-4fd7-8dce-8555fc5a269f?o=3dp@2x)
+
+##### 3dp@3x
+| square=200 | square=200, overlay=`3dp@3x` |
+:-------------------------:|:-------------------------:
+![](https://api.cappasity.com/api/files/preview/cappasity/s200/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s200/34ddd305-bb53-4fd7-8dce-8555fc5a269f?o=3dp@3x)
