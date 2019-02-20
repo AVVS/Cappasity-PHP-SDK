@@ -17,7 +17,7 @@ use CappasitySDK\Client\Model\Response;
 
 class ReportableClient implements ClientInterface
 {
-    const DSN = 'https://6d68c26b33a34f008359c8647f02a110@sentry.io/1282472';
+    const CAPPASITY_DSN = 'https://6d68c26b33a34f008359c8647f02a110@sentry.io/1282472';
 
     /**
      * @var ClientInterface
@@ -101,14 +101,5 @@ class ReportableClient implements ClientInterface
 
             throw $e;
         }
-    }
-
-    public static function createWithClient(ClientInterface $client)
-    {
-        $ravenClient = (new \Raven_Client(self::DSN, [
-            'timeout' => 2,
-        ]));
-
-        return new self($client, $ravenClient);
     }
 }

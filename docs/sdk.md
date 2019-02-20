@@ -9,28 +9,31 @@ embed your HTML.
 
 ## Table of Contents
 
-- [Client](#client)
+* [Client](#client)
   * [Basic usage](#basic-usage)
-  * [Send error reports to Cappasity developers](#send-error-reports-to-cappasity-developers)
+  * [Send error reports](#send-error-reports)
+    * [Send reports to Cappasity developers](#send-reports-to-cappasity-developers)
+    * [Send reports to your own Sentry account](#send-reports-to-your-own-sentry-account)
   * [Other HTTP clients support](#other-http-clients-support)
+  * [Create Client instance manually](#create-client-instance-manually)
   * [API](#api)
-    + [Error handling](#error-handling)
-      - [AuthorizationAssertionException](#authorizationassertionexception)
-      - [ValidationException](#validationexception)
-      - [RequestException](#requestexception)
-    + [Register sync job](#register-sync-job)
-      - [HTTP Push type](#http-push-type)
-      - [HTTP Pull type](#http-pull-type)
-      - [Errors](#errors)
-    + [Get pull job list](#get-pull-job-list)
-      - [Errors](#errors-1)
-    + [Get pull job result](#get-pull-job-result)
-      - [Errors](#errors-2)
-    + [Acknowledge pull job list](#acknowledge-pull-job-list)
-      - [Errors](#errors-3)
-- [EmbedRenderer](#embedrenderer)
+    * [Error handling](#error-handling)
+      * [AuthorizationAssertionException](#authorizationassertionexception)
+      * [ValidationException](#validationexception)
+      * [RequestException](#requestexception)
+    * [Register sync job](#register-sync-job)
+      * [HTTP Push type](#http-push-type)
+      * [HTTP Pull type](#http-pull-type)
+      * [Errors](#errors)
+    * [Get pull job list](#get-pull-job-list)
+      * [Errors](#errors-1)
+    * [Get pull job result](#get-pull-job-result)
+      * [Errors](#errors-2)
+    * [Acknowledge pull job list](#acknowledge-pull-job-list)
+      * [Errors](#errors-3)
+* [EmbedRenderer](#embedrenderer)
   * [Render embed code](#render-embed-code)
-    + [Rendered code example](#rendered-code-example)
+    * [Rendered code example](#rendered-code-example)
 
 # Client
 
@@ -70,20 +73,45 @@ If you need more information about the response you can always refer to the orig
 $originalResponse = $response->getOriginalResponse();
 ```
 
-## Send error reports to Cappasity developers
-Just set `sendReports` option to `true`:
+## Send error reports
+We use Raven to capture errors. Raven is a PHP client for Sentry error tracking system. By default, we send error 
+reports to our private development account.
+
+### Send reports to Cappasity developers 
+Set `sendReports` option to `true`. This setting enables error reporting. Once enabled, captured errors are sent to the 
+private Cappasity error tracking system. It allows us to help you to troubleshoot development issues.
 ```php 
 use CappasitySDK\ClientFactory;
 
 $client = ClientFactory::getClientInstance([
-    'apiToken' => 'your.api.token'
-    'sendReports' => true
+    'apiToken' => 'your.api.token',
+    'sendReports' => true,
+]);
+```
+
+### Send reports to your own Sentry account
+Our `ClientFactory` allows you to override `Raven_Client` constructor parameters. Explore `\CappasitySDK\ClientFactory`
+class code for more details. 
+```php 
+use CappasitySDK\ClientFactory;
+
+$client = ClientFactory::getClientInstance([
+    'apiToken' => 'your.api.token',
+    'sendReports' => true,
+    'reportableClient' => [
+        'ravenClient' => [
+            'optionsOrDsn' => 'https://3736a7965d59423c867105ee4ba47de2@sentry.io/137605', // Paste your DSN secret
+        ]
+    ]
 ]);
 ```
 
 ## Other HTTP clients support
 By default, we use Guzzle 5 HTTP client. If you want to use another client instead, you can implement 
-`\CappasitySDK\TransportInterface` and create client instance manually.
+`\CappasitySDK\TransportInterface` and [create `\CappasitySDK\Client` instance manually](#create-client-instance-manually).
+
+## Create Client instance manually
+Explore `\CappasitySDK\ClientFactory::getClientInstance()` method and implement your own instantiation.
 
 ## API
 
