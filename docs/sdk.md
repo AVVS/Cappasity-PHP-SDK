@@ -22,16 +22,20 @@ to get a link to an image that fits desired sizes, format, quality, etc.
       * [AuthorizationAssertionException](#authorizationassertionexception)
       * [ValidationException](#validationexception)
       * [RequestException](#requestexception)
+    * [Get user](#get-user)
+      * [Errors](#errors)
+    * [Get view info](#get-view-info)
+      * [Errors](#errors-1)    
     * [Register sync job](#register-sync-job)
       * [HTTP Push type](#http-push-type)
       * [HTTP Pull type](#http-pull-type)
-      * [Errors](#errors)
-    * [Get pull job list](#get-pull-job-list)
-      * [Errors](#errors-1)
-    * [Get pull job result](#get-pull-job-result)
       * [Errors](#errors-2)
-    * [Acknowledge pull job list](#acknowledge-pull-job-list)
+    * [Get pull job list](#get-pull-job-list)
       * [Errors](#errors-3)
+    * [Get pull job result](#get-pull-job-result)
+      * [Errors](#errors-4)
+    * [Acknowledge pull job list](#acknowledge-pull-job-list)
+      * [Errors](#errors-5)
 * [EmbedRenderer](#embedrenderer)
   * [Render embed code](#render-embed-code)
     * [Rendered code example](#rendered-code-example)
@@ -155,12 +159,68 @@ try {
 }
 ```
 
+### Get user
+```php
+use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response; 
+
+/** @var Response\Users\MeGet $response */
+$response = $client
+    ->getUser(new Request\Users\MeGet())
+    ->getBodyData();
+
+$user = $response
+    ->getData()
+    ->getAttributes();
+
+// get user plan
+$plan = $user->getPlan();
+
+// get user alias
+$userAlias = $user->getAlias();
+```
+
+#### Errors
+| Code | Description                   |
+|:----:|-------------------------------|
+| 401  | Authorization error           |
+
+### Get view info
+```php
+use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response; 
+
+$params = Request\Files\InfoGet::fromData(
+    'alice', // user alias
+    '38020fdf-5e11-411c-9116-1610339d59cf', // view ID
+); 
+
+/** @var Response\Files\InfoGet $response */
+$response = $client
+    ->getViewInfo($params)
+    ->getBodyData();
+
+$viewInfo = $response
+    ->getData()
+    ->getAttributes();
+
+// get background color
+$backgroundColor = $viewInfo->getBackgroundColor();
+```
+
+#### Errors
+| Code | Description                   |
+|:----:|-------------------------------|
+| 401  | Authorization error           |
+
 ### Register sync job
 #### HTTP Push type
 ```php
 use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response;
  
-$registerSyncJobId = $client
+/** @var Response\Process\JobsRegisterSyncPost $response */
+$response = $client
   ->registerSyncJob(Request\Process\JobsRegisterSyncPost::fromData(
     [
       [
@@ -172,15 +232,18 @@ $registerSyncJobId = $client
     'push:http',
     'http://your-callback-url.com/foo/bar
   ))
-  ->getBodyData()
-  ->getId();
+  ->getBodyData();
+  
+$jobId = $response->getData()->getId();
 ```
 
 #### HTTP Pull type
 ```php
 use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response;
 
-$registerSyncJobId = $client
+/** @var Response\Process\JobsRegisterSyncPost $response */
+$response = $client
   ->registerSyncJob(Request\Process\JobsRegisterSyncPost::fromData(
     [
       [
@@ -191,8 +254,9 @@ $registerSyncJobId = $client
     ],
     'pull'
   ))
-  ->getBodyData()
-  ->getId();
+  ->getBodyData();
+  
+$jobId = $response->getData()->getId();
 ```
 
 #### Errors
@@ -205,10 +269,14 @@ $registerSyncJobId = $client
 ### Get pull job list
 ```php
 use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response;
  
-$jobList = $client
+/** @var Response\Process\JobsPullListGet $response */
+$response = $client
   ->getPullJobList(Request\Process\JobsPullListGet::fromData($limit, $cursor))
   ->getBodyData();
+  
+$jobs = $response->getData();
 ```
 
 #### Errors
@@ -219,10 +287,14 @@ $jobList = $client
 ### Get pull job result
 ```php
 use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response;
  
-$response = $client->getPullJobResult(Request\Process\JobsPullResultGet::fromData($jobId));
-
-foreach ($response->getBodyData()->getData() as $jobItemResult) {
+/** @var Response\Process\JobsPullResultGet $response */
+$response = $client
+    ->getPullJobResult(Request\Process\JobsPullResultGet::fromData($jobId))
+    ->getBodyData();
+     
+foreach ($response->getData() as $jobItemResult) {
     // handle results
 }
 ```
@@ -235,10 +307,14 @@ foreach ($response->getBodyData()->getData() as $jobItemResult) {
 ### Acknowledge pull job list
 ```php
 use CappasitySDK\Client\Model\Request;
+use CappasitySDK\Client\Model\Response;
 
-$ackJobCount = $client
+/** @var Response\Process\JobsPullAckPost $response */
+$response = $client
   ->ackPullJobList(Request\Process\JobsPullAckPost::fromData($jobIds))
-  ->getBodyData()
+  ->getBodyData();
+  
+$ackJobCount = $response  
   ->getData()
   ->getAck();
 ```
@@ -325,7 +401,7 @@ $embedCode = $renderer->render([
 
 ## Generate preview link
 * Set up `PreviewImageSrcGenerator`
-* Provide Cappasity Account username and Cappasity 3D View ID 
+* Provide Cappasity Account user alias and Cappasity 3D View ID (see how to retrieve [user alias](#get-user)) 
 * Generate links:
 ```php
 use CappasitySDK\PreviewImageSrcGeneratorFactory as GeneratorFactory;
@@ -333,14 +409,15 @@ use CappasitySDK\PreviewImageSrcGenerator as Generator;
 
 $generator = new GeneratorFactory::getGeneratorInstance();
 
-$originalPreview = $generator->generatePreviewImageSrc('username', '38020fdf-5e11-411c-9116-1610339d59cf');
+$originalPreview = $generator->generatePreviewImageSrc('useralias', '38020fdf-5e11-411c-9116-1610339d59cf');
 
 // Explore and use \CappasitySDK\PreviewImageSrcGenerator class constants and static arrays with available options for 
 // better code style:
-$modifiedPreview = $generator->generatePreviewImageSrc('username', '38020fdf-5e11-411c-9116-1610339d59cf', [
+$modifiedPreview = $generator->generatePreviewImageSrc('useralias', '38020fdf-5e11-411c-9116-1610339d59cf', [
     'format' => Generator::FORMAT_PNG, // 'png'
     'overlay' => Generator::OVERLAY_3DP_2X, // '3dp@2x'
     'modifiers' => [
+        'background' => '#FFFFFF'
         'square' => 250,
         'quality' => 30, 
     ],
@@ -425,6 +502,7 @@ Choose reasonable preview `quality`:
 ![](https://api.cappasity.com/api/files/preview/cappasity/s300/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s300-q30/34ddd305-bb53-4fd7-8dce-8555fc5a269f) | ![](https://api.cappasity.com/api/files/preview/cappasity/s300-q50/34ddd305-bb53-4fd7-8dce-8555fc5a269f)
 
 On the 3D Cappasity View upload a person chooses a respective background color. We store it in 3D View metadata.
+See how to retrieve [the view data](#get-view-info), particularly background color.
 You can use that color as preview background color, otherwise it would be white:
 
 | width=200, height=300, crop=cpad | width=200, height=300, background=000000 |

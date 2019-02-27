@@ -29,9 +29,9 @@ class PreviewImageSrcGeneratorTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider provideValidPreviewImageSrcGenerationParams
      */
-    public function testGeneratePreviewImageSrc($username, $viewId, $options, $expectedLink)
+    public function testGeneratePreviewImageSrc($userAlias, $viewId, $options, $expectedLink)
     {
-         $actualLink = $this->generator->generatePreviewImageSrc($username, $viewId, $options);
+         $actualLink = $this->generator->generatePreviewImageSrc($userAlias, $viewId, $options);
 
          $this->assertEquals($expectedLink, $actualLink);
     }

@@ -24,7 +24,6 @@ class ClientFactoryTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->assertEquals(\CappasitySDK\Client::class, get_class($client));
-        $this->assertEquals(\CappasitySDK\Client::BASE_URL_API_CAPPASITY,  $client->getConfig()['baseUrl']);
         $this->assertEquals('api.token.stub', $client->getApiToken());
     }
 

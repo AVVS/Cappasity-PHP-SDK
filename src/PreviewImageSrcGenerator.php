@@ -144,10 +144,7 @@ class PreviewImageSrcGenerator
     }
 
     /**
-     * @todo set up default options?
-     * @todo rename -> generate
-     *
-     * @param $username
+     * @param $userAlias
      * @param $viewId
      * @param array $options
      *
@@ -155,9 +152,9 @@ class PreviewImageSrcGenerator
      *
      * @throws \CappasitySDK\PreviewImageSrcGenerator\Exception\ValidationException
      */
-    public function generatePreviewImageSrc($username, $viewId, array $options = [])
+    public function generatePreviewImageSrc($userAlias, $viewId, array $options = [])
     {
-        $urlSections = [self::getBaseUrl(), $username];
+        $urlSections = [self::getBaseUrl(), $userAlias];
         $this->validateOptions($options);
         $preparedOptions = $this->prepareOptions($options);
 

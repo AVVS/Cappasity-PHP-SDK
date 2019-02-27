@@ -48,6 +48,8 @@ class Client implements ClientInterface
     const ENDPOINT_PROCESS_JOBS_PULL_LIST_GET = '/api/cp/jobs/pull/list';
     const ENDPOINT_PROCESS_JOBS_PULL_RESULT_GET = '/api/cp/jobs/pull/result';
     const ENDPOINT_PROCESS_JOBS_PULL_ACK_POST = '/api/cp/jobs/pull/ack';
+    const ENDPOINT_USERS_ME_GET = '/api/users/me';
+    const ENDPOINT_FILES_INFO_GET = '/api/files/info/%s/%s';
 
     const BASE_URL_API_CAPPASITY = 'https://api.cappasity.com';
 
@@ -61,6 +63,8 @@ class Client implements ClientInterface
             self::ENDPOINT_PROCESS_JOBS_PULL_LIST_GET => 5,
             self::ENDPOINT_PROCESS_JOBS_PULL_RESULT_GET => 5,
             self::ENDPOINT_PROCESS_JOBS_PULL_ACK_POST => 5,
+            self::ENDPOINT_USERS_ME_GET => 5,
+            self::ENDPOINT_FILES_INFO_GET => 5,
         ],
     ];
 
@@ -72,6 +76,7 @@ class Client implements ClientInterface
         self::ENDPOINT_PROCESS_JOBS_PULL_LIST_GET,
         self::ENDPOINT_PROCESS_JOBS_PULL_RESULT_GET,
         self::ENDPOINT_PROCESS_JOBS_PULL_ACK_POST,
+        self::ENDPOINT_USERS_ME_GET,
     ];
 
     /**
@@ -134,9 +139,14 @@ class Client implements ClientInterface
             $requestData['meta']['callback'] = $params->getCallbackUrl();
         }
 
-        $response = $this->makeRequest('POST', static::ENDPOINT_PROCESS_JOBS_REGISTER_SYNC_POST, [
-            'data' => $requestData,
-        ]);
+        $response = $this->makeRequest(
+            'POST',
+            static::ENDPOINT_PROCESS_JOBS_REGISTER_SYNC_POST,
+            [],
+            [
+                'data' => $requestData,
+            ]
+        );
 
         return $this->getResponseAdapter()->transform($response, Response\Process\JobsRegisterSyncPost::class);
     }
@@ -161,9 +171,14 @@ class Client implements ClientInterface
             $query['cursor'] = $params->getCursor();
         }
 
-        $response = $this->makeRequest('GET', static::ENDPOINT_PROCESS_JOBS_PULL_LIST_GET, [
-            'query' => $query
-        ]);
+        $response = $this->makeRequest(
+            'GET',
+            static::ENDPOINT_PROCESS_JOBS_PULL_LIST_GET,
+            [],
+            [
+                'query' => $query
+            ]
+        );
 
         return $this->getResponseAdapter()->transform($response, Response\Process\JobsPullListGet::class);
     }
@@ -178,14 +193,19 @@ class Client implements ClientInterface
         $this->assertAPITokenIsSet();
         $this->assertParams($params, RequestType\Process\JobsPullAckPost::class);
 
-        $response = $this->makeRequest('POST', static::ENDPOINT_PROCESS_JOBS_PULL_ACK_POST, [
-            'data' => [
-                'data' => array_map(
-                    function ($jobId) { return ['id' => $jobId, 'type' => 'sync']; },
-                    $params->getJobIds()
-                ),
-            ],
-        ]);
+        $response = $this->makeRequest(
+            'POST',
+            static::ENDPOINT_PROCESS_JOBS_PULL_ACK_POST,
+            [],
+            [
+                'data' => [
+                    'data' => array_map(
+                        function ($jobId) { return ['id' => $jobId, 'type' => 'sync']; },
+                        $params->getJobIds()
+                    ),
+                ],
+            ]
+        );
 
         return $this->getResponseAdapter()->transform($response, Response\Process\JobsPullAckPost::class);
     }
@@ -200,13 +220,53 @@ class Client implements ClientInterface
         $this->assertAPITokenIsSet();
         $this->assertParams($params, RequestType\Process\JobsPullResultGet::class);
 
-        $response = $this->makeRequest('GET', static::ENDPOINT_PROCESS_JOBS_PULL_RESULT_GET, [
-            'query' => [
-                'id' => $params->getJobId(),
-            ],
-        ]);
+        $response = $this->makeRequest(
+            'GET',
+            static::ENDPOINT_PROCESS_JOBS_PULL_RESULT_GET,
+            [],
+            [
+                'query' => [
+                    'id' => $params->getJobId(),
+                ],
+            ]
+        );
 
         return $this->getResponseAdapter()->transform($response, Response\Process\JobsPullResultGet::class);
+    }
+
+    /**
+     * @param Request\Users\MeGet $params
+     *
+     * @return Response\Container
+     */
+    public function getUser(Request\Users\MeGet $params)
+    {
+        $this->assertAPITokenIsSet();
+
+        $this->assertParams($params, RequestType\Users\MeGet::class);
+
+        $response = $this->makeRequest('GET', static::ENDPOINT_USERS_ME_GET);
+
+        return $this->getResponseAdapter()->transform($response, Response\Users\MeGet::class);
+    }
+
+    /**
+     * @param Request\Files\InfoGet|null $params
+     *
+     * @return Response\Container
+     */
+    public function getViewInfo(Request\Files\InfoGet $params)
+    {
+        $this->assertAPITokenIsSet();
+        $this->assertParams($params, RequestType\Files\InfoGet::class);
+
+        $response = $this->makeRequest(
+            'GET',
+            self::ENDPOINT_FILES_INFO_GET,
+            [$params->getUserAlias(), $params->getViewId()]
+        );
+
+        return $this->getResponseAdapter()->transform($response, Response\Files\InfoGet::class);
     }
 
     /**
@@ -236,23 +296,23 @@ class Client implements ClientInterface
     /**
      * @param string $method
      * @param string $endpoint
+     * @param array $urlParams
      * @param array $options
      *
      * @return Transport\ResponseContainer
      * @throws Client\Exception\RequestException
      */
-    private function makeRequest($method, $endpoint, array $options)
+    private function makeRequest($method, $endpoint, $urlParams = [], array $options = [])
     {
         try {
             return $this->transport->makeRequest(
                 $method,
-                $this->getUrl($endpoint),
+                $this->getUrl($endpoint, $urlParams),
                 $this->makeOptions($endpoint, $options)
             );
         } catch (Transport\Exception\RequestException $e) {
             throw Client\Exception\RequestException::wrapTransportRequestException($e);
         }
-
     }
 
     /**
@@ -312,12 +372,14 @@ class Client implements ClientInterface
 
     /**
      * @param string $endpoint
-     *
+     * @param string[] $urlParams
      * @return string
      */
-    private function getUrl($endpoint)
+    private function getUrl($endpoint, array $urlParams = [])
     {
-        return $this->config['baseUrl'] . $endpoint;
+        $path = sprintf($endpoint, ...$urlParams);
+
+        return "{$this->config['baseUrl']}{$path}";
     }
 
     /**
