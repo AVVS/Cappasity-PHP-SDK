@@ -19,10 +19,12 @@ use CappasitySDK\Client\Model\Request\Process\JobsRegisterSyncPost as JobsRegist
 use CappasitySDK\Client\Model\Request\Process\JobsPullListGet as JobsPullListGetModel;
 use CappasitySDK\Client\Model\Request\Process\JobsPullResultGet as JobsPullResultGetModel;
 use CappasitySDK\Client\Model\Request\Process\JobsPullAckPost as JobsPullAckPostModel;
+use CappasitySDK\Client\Model\Request\Files\InfoGet as InfoGetModel;
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsRegisterSyncPost as JobsRegisterSyncPostType;
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsPullListGet as JobsPullListGetType;
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsPullResultGet as JobsPullResultGetType;
 use CappasitySDK\Client\Validator\Type\Request\Process\JobsPullAckPost as JobsPullAckPostType;
+use CappasitySDK\Client\Validator\Type\Request\Files\InfoGet as InfoGetType;
 use CappasitySDK\PreviewImageSrcGenerator\Validator\Type\PreviewImageOptions as PreviewImageOptionsType;
 
 class ValidatorTypesTest extends \PHPUnit_Framework_TestCase
@@ -370,6 +372,50 @@ class ValidatorTypesTest extends \PHPUnit_Framework_TestCase
                     '  - overlay must be in { "3dp", "3dp@2x", "3dp@3x" }',
                 ]),
             ]
+        ];
+    }
+
+    /**
+     * @dataProvider provideFileInfoGetData
+     * @param [] $fromDataArgs
+     * @param bool $shouldBeValid
+     * @param null|string $expectedError
+     */
+    public function testValidateFileInfoGetData(array $fromDataArgs, $shouldBeValid, $expectedError = null)
+    {
+        $params = InfoGetModel::fromData(...$fromDataArgs);
+
+        foreach (InfoGetType::getRequiredRuleNamespaces() as $namespace) {
+            v::with($namespace);
+        }
+
+        $validator = InfoGetType::configureValidator();
+
+        $this->assertValidator($validator, $params, $shouldBeValid, $expectedError);
+    }
+
+    public function provideFileInfoGetData()
+    {
+        return [
+            [
+                [
+                    'alice',
+                    'dd596de4-ae2b-4d66-a023-242ca7d86b51',
+                ],
+                true,
+            ],
+            [
+                [
+                    1,
+                    2,
+                ],
+                false,
+                join(PHP_EOL, [
+                    '- These rules must pass for InfoGet',
+                    '  - userAlias must be a string',
+                    '  - viewId must be a string',
+                ]),
+            ],
         ];
     }
 

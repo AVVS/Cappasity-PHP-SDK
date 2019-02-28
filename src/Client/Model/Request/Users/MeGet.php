@@ -10,11 +10,11 @@
  * @copyright 2019 Cappasity Inc.
  */
 
-namespace CappasitySDK\Client\Validator;
+namespace CappasitySDK\Client\Model\Request\Users;
 
-use CappasitySDK\ValidatorTypeInterface;
+use CappasitySDK\Client;
 
-interface TypeInterface extends ValidatorTypeInterface
+class MeGet implements Client\Model\Request\RequestParamsInterface
 {
 
 }

@@ -21,7 +21,7 @@ use CappasitySDK\Client\Validator\TypeInterface;
 class JobsRegisterSyncPost implements TypeInterface
 {
     /**
-     * @return \Respect\Validation\Validator
+     * @return V
      */
     public static function configureValidator()
     {

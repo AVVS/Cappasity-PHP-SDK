@@ -14,7 +14,7 @@ namespace CappasitySDK\PreviewImageSrcGenerator\Validator\Rules;
 
 trait BackgroundTrait
 {
-    public static $backgroundRegex = '/^#[0-9a-f]{6}$/';
+    public static $backgroundRegex = '/^#[0-9a-fA-F]{6}$/';
 
     /**
      * @param string $background
