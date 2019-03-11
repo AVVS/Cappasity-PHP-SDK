@@ -46,7 +46,7 @@ class JobsRegisterSyncPost implements Client\Model\Request\RequestParamsInterfac
      * @param string $syncType
      * @param null|string $callbackUrl
      */
-    public function __construct(array $items = [], $syncType, $callbackUrl = null)
+    public function __construct(array $items, $syncType, $callbackUrl = null)
     {
         $this->items = $items;
         $this->syncType = $syncType;

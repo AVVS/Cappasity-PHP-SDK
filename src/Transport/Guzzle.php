@@ -217,7 +217,9 @@ class Guzzle implements CappasitySDK\TransportInterface
     private function transformResponse(GuzzleHttp\Message\ResponseInterface $response)
     {
         $headers = array_map(
-            function ($headerName) use ($response) { return $response->getHeaderAsArray($headerName); },
+            function ($headerName) use ($response) {
+                return $response->getHeaderAsArray($headerName);
+            },
             array_keys($response->getHeaders())
         );
 

@@ -1035,7 +1035,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      * @param array $transformArguments
      * @param $modelResponseContainer
      */
-    private function expectResponseTransformed(array $transformArguments, $modelResponseContainer) {
+    private function expectResponseTransformed(array $transformArguments, $modelResponseContainer)
+    {
         $this->responseAdapterMock
             ->expects($this->once())
             ->method('transform')
