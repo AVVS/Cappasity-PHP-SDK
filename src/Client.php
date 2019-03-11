@@ -200,7 +200,9 @@ class Client implements ClientInterface
             [
                 'data' => [
                     'data' => array_map(
-                        function ($jobId) { return ['id' => $jobId, 'type' => 'sync']; },
+                        function ($jobId) {
+                            return ['id' => $jobId, 'type' => 'sync'];
+                        },
                         $params->getJobIds()
                     ),
                 ],
@@ -336,7 +338,7 @@ class Client implements ClientInterface
     {
         if (!is_string($this->apiToken) || $this->apiToken === '') {
             throw new AuthorizationAssertionException('API token must be set');
-        }    
+        }
     }
 
     /**
@@ -354,7 +356,8 @@ class Client implements ClientInterface
         }
     }
 
-    private function validateConfig() {
+    private function validateConfig()
+    {
         if (!in_array($this->config['baseUrl'], self::$allowedBaseUrls)) {
             throw new Client\Exception\InvalidConfigValueException('Invalid base URL');
         }
