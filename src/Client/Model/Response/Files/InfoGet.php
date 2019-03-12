@@ -133,7 +133,7 @@ class InfoGet implements Response\DataInterface
             ->setParams($embedParams);
 
         $files = array_map(
-            function(array $file) {
+            function (array $file) {
                 return (new InfoGet\Data\Attributes\File())
                     ->setType($file['type'])
                     ->setFilename($file['filename'])

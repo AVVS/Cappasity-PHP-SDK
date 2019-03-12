@@ -185,7 +185,12 @@ class PreviewImageSrcGenerator
      */
     private function prepareModifiersString(array $modifiers)
     {
-        $filteredModifiers = array_filter($modifiers, function($value) { return $value !== null; });
+        $filteredModifiers = array_filter(
+            $modifiers,
+            function ($value) {
+                return $value !== null;
+            }
+        );
         $modifiersTitlesToKeys = self::$modifiersTitlesToKeys;
         $modifiersStrings = [];
 

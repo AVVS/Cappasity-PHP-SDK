@@ -74,7 +74,7 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
             'timeout' => 5,
         ]);
 
-        $this->assertInstanceOf(\CappasitySDK\Transport\ResponseContainer::class,  $response);
+        $this->assertInstanceOf(\CappasitySDK\Transport\ResponseContainer::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals([], $response->getHeaders());
         $this->assertEquals($mockedResponse, $response->getOriginalResponse());
