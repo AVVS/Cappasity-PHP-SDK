@@ -32,7 +32,7 @@ class ReportableTransportTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->basicTransportMock = $this->getMockBuilder(\CappasitySDK\Transport\Guzzle::class)
+        $this->basicTransportMock = $this->getMockBuilder(\CappasitySDK\Transport\Guzzle6::class)
             ->disableOriginalConstructor()
             ->setMethods(['makeRequest'])
             ->getMock();
@@ -138,27 +138,8 @@ class ReportableTransportTest extends \PHPUnit_Framework_TestCase
     private function makeTransportResponseContainer($code, array $data, $headers = [])
     {
         $mockedResponseBody = \GuzzleHttp\Stream\Stream::factory(json_encode($data));
-        $mockedOriginalResponse = new \GuzzleHttp\Message\Response($code, $headers, $mockedResponseBody);
+        $mockedOriginalResponse = new \GuzzleHttp\Psr7\Response($code, $headers, $mockedResponseBody);
 
         return new \CappasitySDK\Transport\ResponseContainer($code, $headers, $data, $mockedOriginalResponse);
-    }
-
-    /**
-     * @param \CappasitySDK\Transport\ResponseContainer $transportResponseContainer
-     * @param $className
-     * @return \CappasitySDK\Client\Model\Response\Container
-     */
-    private function makeClientResponseContainer(\CappasitySDK\Transport\ResponseContainer $transportResponseContainer, $className)
-    {
-        if (!method_exists($className, 'fromResponse')) {
-            throw new \LogicException('Class found by classname does not have `fromResponse` method');
-        }
-
-        return new \CappasitySDK\Client\Model\Response\Container(
-            200,
-            [],
-            $className::fromResponse($transportResponseContainer->getData()),
-            $transportResponseContainer->getOriginalResponse()
-        );
     }
 }

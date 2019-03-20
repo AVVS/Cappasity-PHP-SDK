@@ -12,10 +12,12 @@
 
 namespace CappasitySDK\Transport;
 
-use GuzzleHttp;
 use CappasitySDK;
+use GuzzleHttp;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
-class Guzzle implements CappasitySDK\TransportInterface
+class Guzzle6 implements CappasitySDK\TransportInterface
 {
     /**
      * @var GuzzleHttp\ClientInterface
@@ -41,39 +43,31 @@ class Guzzle implements CappasitySDK\TransportInterface
     }
 
     /**
-     * @param string $method
-     * @param string $url
-     * @param array $options
-     *
-     * @return ResponseContainer
-     * @throws Exception\RequestException
+     * @return self
      */
-    public function makeRequest($method, $url, array $options = [])
+    public static function createDefault()
     {
-        $request = $this->httpClient->createRequest($method, $url, $this->resolveOptions($options));
-
-        try {
-            $response = $this->httpClient->send($request);
-        } catch (GuzzleHttp\Exception\RequestException $e) {
-            throw $this->getWrappedException($e);
-        }
-
-        if ($response->getStatusCode() >= 400) {
-            throw static::createExceptionFromErrorResponse($request, $response);
-        }
-
-        return $this->transformResponse($response);
+        return new self(static::createDefaultHttpClient());
     }
 
     /**
-     * @param \GuzzleHttp\Message\RequestInterface $request
-     * @param \GuzzleHttp\Message\ResponseInterface $response
+     * @param array $config
      *
+     * @return self
+     */
+    public static function createWithConfig(array $config)
+    {
+        return new self(static::createDefaultHttpClient(), $config);
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
      * @return Exception\RequestException
      */
     public static function createExceptionFromErrorResponse(
-        \GuzzleHttp\Message\RequestInterface $request,
-        \GuzzleHttp\Message\ResponseInterface $response
+        RequestInterface $request,
+        ResponseInterface $response
     ) {
         if ($response->getStatusCode() < 400) {
             $className = static::class;
@@ -88,24 +82,28 @@ class Guzzle implements CappasitySDK\TransportInterface
     }
 
     /**
-     * @return Guzzle
-     */
-    public static function createDefault()
-    {
-        return new self(static::createDefaultHttpClient());
-    }
-
-    /**
-     * @param array $config
+     * @param ResponseInterface $response
      *
-     * @return Guzzle
+     * @return array
+     *
+     * @throws Exception\UnexpectedResponseFormatException
      */
-    public static function createWithConfig(array $config)
+    private static function parseResponseBody(ResponseInterface $response)
     {
-        return new self(static::createDefaultHttpClient(), $config);
+        try {
+            return GuzzleHttp\json_decode($response->getBody(), true);
+        } catch (\InvalidArgumentException $e) {
+            throw new Exception\UnexpectedResponseFormatException(
+                $e->getMessage(),
+                $e->getCode(),
+                $e->getPrevious()
+            );
+        }
     }
 
     /**
+     * TODO move parsing logic to a helper or inject
+     *
      * Possible formats are:
      * I.
      * {
@@ -130,17 +128,21 @@ class Guzzle implements CappasitySDK\TransportInterface
      *   ]
      * }
      *
-     * @param GuzzleHttp\Message\ResponseInterface $response
+     * @param ResponseInterface $response
      * @return string
      *
      * @throws Exception\UnexpectedResponseFormatException
      */
-    private static function makeErrorMessage(GuzzleHttp\Message\ResponseInterface $response)
+    private static function makeErrorMessage(ResponseInterface $response)
     {
         try {
-            $parsedResponse = $response->json();
-        } catch (\RuntimeException $e) {
-            throw new Exception\UnexpectedResponseFormatException('Can not parse response as JSON');
+            $parsedResponse = static::parseResponseBody($response);
+        } catch (\InvalidArgumentException $e) {
+            throw new Exception\UnexpectedResponseFormatException(
+                $e->getMessage(),
+                $e->getCode(),
+                $e->getPrevious()
+            );
         }
 
         $hasValidProcessErrorStructure = array_key_exists('statusCode', $parsedResponse)
@@ -186,23 +188,70 @@ class Guzzle implements CappasitySDK\TransportInterface
         return "Server responded with an error [{$response->getStatusCode()}]: {$message}";
     }
 
+
+    /**
+     * @return GuzzleHttp\Client
+     */
+    private static function createDefaultHttpClient()
+    {
+        return new GuzzleHttp\Client();
+    }
+
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     *
+     * @return ResponseContainer
+     *
+     * @throws Exception\RequestException
+     */
+    public function makeRequest($method, $url, array $options = [])
+    {
+        $request = $this->createRequest($method, $url, $options);
+
+        try {
+            $response = $this->httpClient->send($request, $this->resolveRequestOptions($options));
+        } catch (GuzzleHttp\Exception\GuzzleException $e) {
+            throw $this->getWrappedException($e);
+        }
+
+        if ($response->getStatusCode() >= 400) {
+            throw static::createExceptionFromErrorResponse($request, $response);
+        }
+
+        return $this->transformResponse($response);
+    }
+
+    /**
+     * @param $method
+     * @param $url
+     * @param array $options
+     * @return GuzzleHttp\Psr7\Request
+     */
+    private function createRequest($method, $url, array $options = [])
+    {
+        $query = isset($options['query']) ? http_build_query($options['query']) : '';
+        $url = $query === '' ? $url : "{$url}?{$query}";
+        $headers = isset($options['headers']) ? $options['headers'] : [];
+        $body = isset($options['data']) ? GuzzleHttp\json_encode($options['data']) : '';
+
+        return new GuzzleHttp\Psr7\Request(
+            $method,
+            $url,
+            $headers,
+            $body
+        );
+    }
+
     /**
      * @param array $options
      *
      * @return array
      */
-    private function resolveOptions(array $options)
+    private function resolveRequestOptions(array $options)
     {
         $resolvedOptions = [];
-        if (array_key_exists('query', $options)) {
-            $resolvedOptions['query'] = $options['query'];
-        }
-        if (array_key_exists('data', $options)) {
-            $resolvedOptions['json'] = $options['data'];
-        }
-        if (array_key_exists('headers', $options)) {
-            $resolvedOptions['headers'] = $options['headers'];
-        }
         if (array_key_exists('timeout', $options)) {
             $resolvedOptions['timeout'] = $options['timeout'];
         }
@@ -211,44 +260,33 @@ class Guzzle implements CappasitySDK\TransportInterface
     }
 
     /**
-     * @param GuzzleHttp\Message\ResponseInterface $response
-     * @return ResponseContainer
-     */
-    private function transformResponse(GuzzleHttp\Message\ResponseInterface $response)
-    {
-        $headers = array_map(
-            function ($headerName) use ($response) {
-                return $response->getHeaderAsArray($headerName);
-            },
-            array_keys($response->getHeaders())
-        );
-
-        return new ResponseContainer(
-            $response->getStatusCode(),
-            $headers,
-            $response->json(),
-            $response
-        );
-    }
-
-    /**
-     * @param GuzzleHttp\Exception\RequestException $original
+     * @param GuzzleHttp\Exception\GuzzleException $original
      * @return Exception\RequestException
      */
-    private function getWrappedException(\GuzzleHttp\Exception\RequestException $original)
+    private function getWrappedException(GuzzleHttp\Exception\GuzzleException $original)
     {
         $e = new Exception\RequestException($original->getMessage(), $original->getCode(), $original->getPrevious());
-        $e->setRequest($original->getRequest());
-        $e->setResponse($original->getResponse());
+
+        if ($original instanceof GuzzleHttp\Exception\RequestException) {
+            $e
+                ->setRequest($original->getRequest())
+                ->setResponse($original->getResponse());
+        }
 
         return $e;
     }
 
     /**
-     * @return GuzzleHttp\Client
+     * @param ResponseInterface $response
+     * @return ResponseContainer
      */
-    private static function createDefaultHttpClient()
+    private function transformResponse(ResponseInterface $response)
     {
-        return new GuzzleHttp\Client();
+        return new ResponseContainer(
+            $response->getStatusCode(),
+            $response->getHeaders(),
+            static::parseResponseBody($response),
+            $response
+        );
     }
 }
