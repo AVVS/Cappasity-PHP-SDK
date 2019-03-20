@@ -17,8 +17,17 @@
         "squizlabs/php_codesniffer": "3.*"
     },
     "scripts": {
-        "build": "docker build -t cappasity-sdk .",
-        "test": "composer run-script build && docker run -i --rm --name cappasity-sdk cappasity-sdk",
+        "test": "composer run-script test-php56 && composer run-script test-php72",
+        "test-php56": "composer run-script build-php56 && docker run -i --rm --name cappasity-sdk-php56 cappasity-sdk-php56",
+        "build-php56": "docker build -t cappasity-sdk-php56 -f ./Dockerfile-php56 .",
+        "test-php70": "composer run-script build-php70 && docker run -i --rm --name cappasity-sdk-php70 cappasity-sdk-php70",
+        "build-php70": "docker build -t cappasity-sdk-php70 -f ./Dockerfile-php70 .",
+        "test-php71": "composer run-script build-php71 && docker run -i --rm --name cappasity-sdk-php71 cappasity-sdk-php71",
+        "build-php71": "docker build -t cappasity-sdk-php71 -f ./Dockerfile-php71 .",
+        "test-php72": "composer run-script build-php72 && docker run -i --rm --name cappasity-sdk-php72 cappasity-sdk-php72",
+        "build-php72": "docker build -t cappasity-sdk-php72 -f ./Dockerfile-php72 .",
+        "test-php73": "composer run-script build-php73 && docker run -i --rm --name cappasity-sdk-php73 cappasity-sdk-php73",
+        "build-php73": "docker build -t cappasity-sdk-php73 -f ./Dockerfile-php73 .",
         "post-install-cmd": "sh ./bin/setup.sh"
     },
     "authors": [
