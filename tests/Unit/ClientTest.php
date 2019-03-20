@@ -50,7 +50,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->transportMock = $this->getMockBuilder(\CappasitySDK\Transport\Guzzle::class)
+        $this->transportMock = $this->getMockBuilder(\CappasitySDK\Transport\Guzzle6::class)
             ->disableOriginalConstructor()
             ->setMethods(['makeRequest'])
             ->getMock();
@@ -1053,7 +1053,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     private function makeTransportResponseContainer($code, array $data, $headers = [])
     {
         $mockedResponseBody = \GuzzleHttp\Stream\Stream::factory(json_encode($data));
-        $mockedOriginalResponse = new \GuzzleHttp\Message\Response($code, $headers, $mockedResponseBody);
+        $mockedOriginalResponse = new \GuzzleHttp\Psr7\Response($code, $headers, $mockedResponseBody);
 
         return new \CappasitySDK\Transport\ResponseContainer($code, $headers, $data, $mockedOriginalResponse);
     }

@@ -48,7 +48,7 @@ class ClientFactory
         $apiToken = $resolvedOptions['apiToken'];
 
         if ($resolvedOptions['transport']['type'] === self::GUZZLE_TRANSPORT) {
-            $transport = new \CappasitySDK\Transport\Guzzle($httpClient, $transportOptions);
+            $transport = new \CappasitySDK\Transport\Guzzle6($httpClient, $transportOptions);
         } else {
             throw new \LogicException(sprintf('Unhandled transport type %s', $resolvedOptions['transport']));
         }

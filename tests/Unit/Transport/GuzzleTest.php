@@ -29,7 +29,6 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
         $this->httpClientMock = $this->getMockBuilder(\GuzzleHttp\Client::class)
             ->disableOriginalConstructor()
             ->setMethods([
-                'createRequest',
                 'send',
             ])
             ->getMock();
@@ -39,34 +38,27 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
 
     public function testMakeRequest()
     {
-        $mockedRequest = $this->getMockBuilder(\GuzzleHttp\Message\Request::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
+        $expectedRequest = new \GuzzleHttp\Psr7\Request(
+            'GET',
+            'http://aaa.com?a=b',
+            ['e' => 'f'],
+            \GuzzleHttp\json_encode(['c' => 'd'])
+        );
         $mockedResponseBody = \GuzzleHttp\Stream\Stream::factory(json_encode(['data' => 'foobar']));
-        $mockedResponse = new \GuzzleHttp\Message\Response(200, [], $mockedResponseBody);
+        $mockedResponse = new \GuzzleHttp\Psr7\Response(200, [], $mockedResponseBody);
 
-        $this->httpClientMock
-            ->expects($this->once())
-            ->method('createRequest')
-            ->with(
-                'GET',
-                'http://aaa.com',
-                [
-                    'query' => ['a' => 'b'],
-                    'json' => ['c' => 'd'],
-                    'headers' => ['e' => 'f'],
-                    'timeout' => 5,
-                ]
-            )
-            ->willReturn($mockedRequest);
         $this->httpClientMock
             ->expects($this->once())
             ->method('send')
-            ->with($mockedRequest)
+            ->with(
+                $this->expectGuzzleRequest($expectedRequest),
+                [
+                    'timeout' => 5,
+                ]
+            )
             ->willReturn($mockedResponse);
 
-        $guzzleTransport = new \CappasitySDK\Transport\Guzzle($this->httpClientMock, $this->config);
+        $guzzleTransport = new \CappasitySDK\Transport\Guzzle6($this->httpClientMock, $this->config);
         $response = $guzzleTransport->makeRequest('GET', 'http://aaa.com', [
             'query' => ['a' => 'b'],
             'data' => ['c' => 'd'],
@@ -87,9 +79,12 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
      */
     public function testThrowExceptionOnProcessErrorResponse()
     {
-        $mockedRequest = $this->getMockBuilder(\GuzzleHttp\Message\Request::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $expectedRequest = new \GuzzleHttp\Psr7\Request(
+            'GET',
+            'http://aaa.com?a=b',
+            ['e' => 'f'],
+            \GuzzleHttp\json_encode(['c' => 'd'])
+        );
 
         $mockedResponseBody = \GuzzleHttp\Stream\Stream::factory(json_encode([
             'statusCode' => 404,
@@ -97,29 +92,20 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
             'message' => 'job data missing',
             'name' => 'HttpStatusError'
         ]));
-        $mockedResponse = new \GuzzleHttp\Message\Response(404, [], $mockedResponseBody);
+        $mockedResponse = new \GuzzleHttp\Psr7\Response(404, [], $mockedResponseBody);
 
-        $this->httpClientMock
-            ->expects($this->once())
-            ->method('createRequest')
-            ->with(
-                'GET',
-                'http://aaa.com',
-                [
-                    'query' => ['a' => 'b'],
-                    'json' => ['c' => 'd'],
-                    'headers' => ['e' => 'f'],
-                    'timeout' => 5,
-                ]
-            )
-            ->willReturn($mockedRequest);
         $this->httpClientMock
             ->expects($this->once())
             ->method('send')
-            ->with($mockedRequest)
+            ->with(
+                $this->expectGuzzleRequest($expectedRequest),
+                [
+                    'timeout' => 5
+                ]
+            )
             ->willReturn($mockedResponse);
 
-        $guzzleTransport = new \CappasitySDK\Transport\Guzzle($this->httpClientMock, $this->config);
+        $guzzleTransport = new \CappasitySDK\Transport\Guzzle6($this->httpClientMock, $this->config);
         $guzzleTransport->makeRequest('GET', 'http://aaa.com', [
             'query' => ['a' => 'b'],
             'data' => ['c' => 'd'],
@@ -134,11 +120,14 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
      */
     public function testThrowExceptionOnFilesErrorResponse()
     {
-        $mockedRequest = $this->getMockBuilder(\GuzzleHttp\Message\Request::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $expectedRequest = new \GuzzleHttp\Psr7\Request(
+            'GET',
+            'http://aaa.com?a=b',
+            ['e' => 'f'],
+            \GuzzleHttp\json_encode(['c' => 'd'])
+        );
 
-        $mockedResponseBody = \GuzzleHttp\Stream\Stream::factory(json_encode([
+        $mockedResponseBody = json_encode([
             'meta' => [
                 'id' => 'd715ee2b-aea5-4f78-94ee-c7ec3bfaad40'
             ],
@@ -150,35 +139,41 @@ class GuzzleTest extends \PHPUnit_Framework_TestCase
                     'detail' => [],
                 ],
             ],
-        ]));
-        $mockedResponse = new \GuzzleHttp\Message\Response(404, [], $mockedResponseBody);
+        ]);
+        $mockedResponse = new \GuzzleHttp\Psr7\Response(404, [], $mockedResponseBody);
 
-        $this->httpClientMock
-            ->expects($this->once())
-            ->method('createRequest')
-            ->with(
-                'GET',
-                'http://aaa.com',
-                [
-                    'query' => ['a' => 'b'],
-                    'json' => ['c' => 'd'],
-                    'headers' => ['e' => 'f'],
-                    'timeout' => 5,
-                ]
-            )
-            ->willReturn($mockedRequest);
         $this->httpClientMock
             ->expects($this->once())
             ->method('send')
-            ->with($mockedRequest)
+            ->with(
+                $this->expectGuzzleRequest($expectedRequest),
+                [
+                    'timeout' => 5,
+                ]
+            )
             ->willReturn($mockedResponse);
 
-        $guzzleTransport = new \CappasitySDK\Transport\Guzzle($this->httpClientMock, $this->config);
+        $guzzleTransport = new \CappasitySDK\Transport\Guzzle6($this->httpClientMock, $this->config);
         $guzzleTransport->makeRequest('GET', 'http://aaa.com', [
             'query' => ['a' => 'b'],
             'data' => ['c' => 'd'],
             'headers' => ['e' => 'f'],
             'timeout' => 5,
         ]);
+    }
+
+    /**
+     * @param \GuzzleHttp\Psr7\Request $expectedRequest
+     * @return \PHPUnit_Framework_Constraint_Callback
+     */
+    private function expectGuzzleRequest(\GuzzleHttp\Psr7\Request $expectedRequest)
+    {
+        return self::callback(
+            function (\GuzzleHttp\Psr7\Request $actualRequest) use ($expectedRequest) {
+                return $expectedRequest->getBody()->getContents() === $actualRequest->getBody()->getContents()
+                    && (string) $expectedRequest->getUri() === (string) $actualRequest->getUri()
+                    && $expectedRequest->getHeaders() === $actualRequest->getHeaders();
+            }
+        );
     }
 }
