@@ -15,7 +15,9 @@ namespace CappasitySDK\Transport\Exception;
 class RequestException extends \Exception
 {
     /**
-     * @var mixed
+     * Is null when original request object is not available
+     *
+     * @var mixed|null
      */
     private $request;
 
@@ -25,7 +27,7 @@ class RequestException extends \Exception
     private $response;
 
     /**
-     * @return mixed
+     * @return mixed|null
      */
     public function getRequest()
     {
@@ -33,7 +35,7 @@ class RequestException extends \Exception
     }
 
     /**
-     * @param mixed $request
+     * @param mixed|null $request
      * @return $this
      */
     public function setRequest($request)
