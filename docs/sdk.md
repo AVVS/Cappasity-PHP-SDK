@@ -142,7 +142,7 @@ Request parameters primary validation is implemented on the SDK side. When valid
 #### RequestException
 `CappasitySDK\Client\Exception\RequestException` is generally thrown when an HTTP error occurs.
 Possible error codes and their descriptions are listed next to each SDK method example.
-RequestException instance also holds original response object in case you need more info.
+RequestException instance also holds the original response object in case you need more info.
 
 ```php
 use CappasitySDK\Client\Exception\RequestException;
