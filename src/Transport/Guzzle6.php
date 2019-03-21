@@ -14,7 +14,6 @@ namespace CappasitySDK\Transport;
 
 use CappasitySDK;
 use GuzzleHttp;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class Guzzle6 implements CappasitySDK\TransportInterface
@@ -61,21 +60,17 @@ class Guzzle6 implements CappasitySDK\TransportInterface
     }
 
     /**
-     * @param RequestInterface $request
      * @param ResponseInterface $response
      * @return Exception\RequestException
      */
-    public static function createExceptionFromErrorResponse(
-        RequestInterface $request,
-        ResponseInterface $response
-    ) {
+    public static function createExceptionFromErrorResponse(ResponseInterface $response)
+    {
         if ($response->getStatusCode() < 400) {
             $className = static::class;
             throw new \LogicException("Attempted to create instance of {$className} from a non error response");
         }
 
         $e = new Exception\RequestException(static::makeErrorMessage($response), $response->getStatusCode());
-        $e->setRequest($request);
         $e->setResponse($response);
 
         return $e;
@@ -217,7 +212,7 @@ class Guzzle6 implements CappasitySDK\TransportInterface
         }
 
         if ($response->getStatusCode() >= 400) {
-            throw static::createExceptionFromErrorResponse($request, $response);
+            throw static::createExceptionFromErrorResponse($response);
         }
 
         return $this->transformResponse($response);
