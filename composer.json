@@ -1,5 +1,5 @@
 {
-    "name": "cappasity-inc/cappasity-php-sdk",
+    "name": "cappasity-tech/cappasity-php-sdk",
     "autoload": {
         "psr-4": { "CappasitySDK\\": "src/" }
     },
